@@ -102,6 +102,9 @@
     "electron-builder": "^24.7.0",
     "wait-on": "^7.0.1"
   },
+  "engines": {
+    "node": ">=20.19.0"
+  },
   "build": {
     "appId": "com.hrsac.hrm",
     "productName": "HRSAC",

@@ -5,4 +5,4 @@
 # Do NOT set `base = ""`. Omit `base` or set it to a valid subfolder containing package.json.
 
 [build.environment]
-  NODE_VERSION = "18"
+  NODE_VERSION = "20.19.0"
