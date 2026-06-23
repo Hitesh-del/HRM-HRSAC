@@ -21,7 +21,7 @@ export default function ForgotPasswordPage() {
 
     setLoading(true);
     try {
-      // Call Edge Function — uses Resend with HR-SAC TECH branding from noreply@hrsactech.in
+      // Call Edge Function — uses Resend with HR-SAC TECH branding
       const { error: fnErr } = await supabase.functions.invoke('send-forgot-password', {
         body: { email: trimmed },
       });
