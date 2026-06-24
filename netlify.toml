@@ -9,3 +9,9 @@
   # Omit expected build-time environment keys from Netlify secrets scanning.
   # Real secret values should be set securely in Netlify site settings, not committed here.
   SECRETS_SCAN_OMIT_KEYS = "VITE_SUPABASE_URL,VITE_SUPABASE_ANON_KEY,VITE_SUPABASE_PUBLISHABLE_KEY,RESEND_API_KEY,DAILY_API_KEY,RESEND_FROM_EMAIL"
+
+# SPA routing: redirect all 404s to index.html so React Router can handle them
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
