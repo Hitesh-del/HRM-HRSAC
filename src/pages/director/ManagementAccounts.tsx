@@ -72,11 +72,22 @@ export default function ManagementAccounts() {
 
   const handleCreate = async (v: CreateMgmtForm) => {
     setSaving(true);
+    const { data: sessionData } = await supabase.auth.getSession();
+    const token = sessionData?.session?.access_token || sessionData?.access_token || null;
     const { data, error } = await supabase.functions.invoke('create-account', {
-      body: { identifier: v.identifier, password: v.password, role: 'management', full_name: v.full_name, phone: v.phone || null, department_id: v.department_id || null, designation: v.designation || null, employee_id: v.employee_id || null }
+      body: { identifier: v.identifier, password: v.password, role: 'management', full_name: v.full_name, phone: v.phone || null, department_id: v.department_id || null, designation: v.designation || null, employee_id: v.employee_id || null },
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     });
     setSaving(false);
-    if (error || data?.error) { toast.error(data?.error || 'Failed to create account'); return; }
+    if (error || data?.error) {
+      // Log full details for debugging and show the most useful message available
+      // (serverless function may return a JSON `error` field, or the SDK may return an `error` object)
+      // eslint-disable-next-line no-console
+      console.error('create-account invoke error:', { error, data });
+      const message = data?.error || (error?.message || (typeof error === 'string' ? error : JSON.stringify(error))) || 'Failed to create account';
+      toast.error(message);
+      return;
+    }
     toast.success('Management account created');
     if (data?.user_id) { setHighlightId(data.user_id); setTimeout(() => setHighlightId(null), 2000); }
     setCreateOpen(false);

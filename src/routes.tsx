@@ -74,6 +74,7 @@ import HelpSupport from '@/pages/employee/HelpSupport';
 import EmpSettings from '@/pages/employee/EmpSettings';
 import MyMeetings from '@/pages/employee/MyMeetings';
 import NotificationsPage from '@/pages/common/NotificationsPage';
+import DiagnosticsPage from '@/pages/DiagnosticsPage';
 
 export interface RouteConfig {
   name: string;
@@ -161,4 +162,7 @@ export const routes: RouteConfig[] = [
   { name: 'Help & Support', path: '/employee/support', element: wrap(<HelpSupport />) },
   { name: 'Employee Settings', path: '/employee/settings', element: wrap(<EmpSettings />) },
   { name: 'Notifications', path: '/employee/notifications', element: wrap(<NotificationsPage />) },
+  
+  // Diagnostics & Utils
+  { name: 'Diagnostics', path: '/diagnostics', element: wrap(<DiagnosticsPage />) },
 ];
