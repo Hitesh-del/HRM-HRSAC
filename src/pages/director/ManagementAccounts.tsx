@@ -84,8 +84,29 @@ export default function ManagementAccounts() {
       // (serverless function may return a JSON `error` field, or the SDK may return an `error` object)
       // eslint-disable-next-line no-console
       console.error('create-account invoke error:', { error, data });
-      const message = data?.error || (error?.message || (typeof error === 'string' ? error : JSON.stringify(error))) || 'Failed to create account';
-      toast.error(message);
+      const sdkMessage = data?.error || (error?.message || (typeof error === 'string' ? error : JSON.stringify(error))) || 'Failed to create account';
+
+      // Try a direct fetch to the function endpoint to capture the raw status and response body
+      try {
+        const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-account`;
+        const bodyObj = { identifier: v.identifier, password: v.password, role: 'management', full_name: v.full_name, phone: v.phone || null, department_id: v.department_id || null, designation: v.designation || null, employee_id: v.employee_id || null };
+        const resp = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+          body: JSON.stringify(bodyObj),
+        });
+        const text = await resp.text();
+        let parsed = null;
+        try { parsed = JSON.parse(text); } catch (_) { parsed = null; }
+        // eslint-disable-next-line no-console
+        console.error('create-account direct response:', { status: resp.status, body: parsed ?? text });
+        const diagMsg = parsed?.error || parsed?.message || text || `Status ${resp.status}`;
+        toast.error(`${sdkMessage}: ${diagMsg}`);
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error('create-account diagnostic fetch failed:', e);
+        toast.error(sdkMessage);
+      }
       return;
     }
     toast.success('Management account created');
