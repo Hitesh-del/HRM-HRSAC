@@ -6,6 +6,7 @@ import type { ReportColumn } from '@/lib/reportExport';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { isValidEmail } from '@/lib/utils';
 import { Card } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -82,8 +83,9 @@ export default function EmployeeManagement() {
 
   const handleCreate = async (v: CreateEmployeeForm) => {
     setSaving(true);
+    const identifier = v.identifier.trim();
     const { data, error } = await supabase.functions.invoke('create-account', {
-      body: { identifier: v.identifier, password: v.password, role: 'employee', full_name: v.full_name, phone: v.phone || null, department_id: v.department_id || null, designation: v.designation || null, employee_id: v.employee_id || null, date_of_joining: v.date_of_joining || null }
+      body: { identifier, password: v.password, role: 'employee', full_name: v.full_name, phone: v.phone || null, department_id: v.department_id || null, designation: v.designation || null, employee_id: v.employee_id || null, date_of_joining: v.date_of_joining || null }
     });
     setSaving(false);
     if (error || data?.error) { toast.error(data?.error || 'Failed to create employee'); return; }
@@ -246,7 +248,7 @@ export default function EmployeeManagement() {
           <Form {...form}><form onSubmit={form.handleSubmit(handleCreate)} className="space-y-3 mt-2">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <FormField control={form.control} name="full_name" rules={{required:'Required'}} render={({field})=>(<FormItem className="col-span-2"><FormLabel className="text-sm font-normal">Full Name</FormLabel><FormControl><Input {...field} placeholder="John Doe"/></FormControl><FormMessage/></FormItem>)}/>
-              <FormField control={form.control} name="identifier" rules={{required:'Required'}} render={({field})=>(<FormItem><FormLabel className="text-sm font-normal">Email / Username</FormLabel><FormControl><Input {...field} placeholder="john@company.com"/></FormControl><FormMessage/></FormItem>)}/>
+              <FormField control={form.control} name="identifier" rules={{required:'Required', validate: value => !value || !value.includes('@') || isValidEmail(value) || 'Invalid email format'}} render={({field})=>(<FormItem><FormLabel className="text-sm font-normal">Email / Username</FormLabel><FormControl><Input {...field} placeholder="john@company.com"/></FormControl><FormMessage/></FormItem>)}/>
               <FormField control={form.control} name="password" rules={{required:'Required',minLength:{value:6,message:'Min 6 chars'}}} render={({field})=>(<FormItem><FormLabel className="text-sm font-normal">Password</FormLabel><FormControl><Input {...field} type="password" placeholder="••••••"/></FormControl><FormMessage/></FormItem>)}/>
               <FormField control={form.control} name="employee_id" render={({field})=>(<FormItem><FormLabel className="text-sm font-normal">Employee ID</FormLabel><FormControl><Input {...field} placeholder="EMP-001"/></FormControl><FormMessage/></FormItem>)}/>
               <FormField control={form.control} name="phone" render={({field})=>(<FormItem><FormLabel className="text-sm font-normal">Phone</FormLabel><FormControl><Input {...field} placeholder="+1 234 567"/></FormControl><FormMessage/></FormItem>)}/>

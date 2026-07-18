@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { Plus, Search, Edit2, Trash2, Eye, FileDown, RefreshCw, ChevronLeft, ChevronRight, ShieldCheck } from 'lucide-react';
 import { ReportExportDialog } from '@/components/common/ReportExportDialog';
 import type { ReportColumn } from '@/lib/reportExport';
+import { isValidEmail } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -72,10 +73,11 @@ export default function ManagementAccounts() {
 
   const handleCreate = async (v: CreateMgmtForm) => {
     setSaving(true);
+    const identifier = v.identifier.trim();
     const { data: sessionData } = await supabase.auth.getSession();
     const token = sessionData?.session?.access_token || sessionData?.access_token || null;
     const { data, error } = await supabase.functions.invoke('create-account', {
-      body: { identifier: v.identifier, password: v.password, role: 'management', full_name: v.full_name, phone: v.phone || null, department_id: v.department_id || null, designation: v.designation || null, employee_id: v.employee_id || null },
+      body: { identifier, password: v.password, role: 'management', full_name: v.full_name, phone: v.phone || null, department_id: v.department_id || null, designation: v.designation || null, employee_id: v.employee_id || null },
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     });
     setSaving(false);
@@ -238,7 +240,7 @@ export default function ManagementAccounts() {
           <Form {...form}><form onSubmit={form.handleSubmit(handleCreate)} className="space-y-3 mt-2">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <FormField control={form.control} name="full_name" rules={{required:'Required'}} render={({field})=>(<FormItem className="col-span-2"><FormLabel className="text-sm font-normal">Full Name</FormLabel><FormControl><Input {...field} placeholder="Jane Smith"/></FormControl><FormMessage/></FormItem>)}/>
-              <FormField control={form.control} name="identifier" rules={{required:'Required'}} render={({field})=>(<FormItem><FormLabel className="text-sm font-normal">Email / Username</FormLabel><FormControl><Input {...field} placeholder="jane@company.com"/></FormControl><FormMessage/></FormItem>)}/>
+              <FormField control={form.control} name="identifier" rules={{required:'Required', validate: value => !value || !value.includes('@') || isValidEmail(value) || 'Invalid email format'}} render={({field})=>(<FormItem><FormLabel className="text-sm font-normal">Email / Username</FormLabel><FormControl><Input {...field} placeholder="jane@company.com"/></FormControl><FormMessage/></FormItem>)}/>
               <FormField control={form.control} name="password" rules={{required:'Required',minLength:{value:6,message:'Min 6 chars'}}} render={({field})=>(<FormItem><FormLabel className="text-sm font-normal">Password</FormLabel><FormControl><Input {...field} type="password" placeholder="••••••"/></FormControl><FormMessage/></FormItem>)}/>
               <FormField control={form.control} name="employee_id" render={({field})=>(<FormItem><FormLabel className="text-sm font-normal">Management ID</FormLabel><FormControl><Input {...field} placeholder="MGT-001"/></FormControl><FormMessage/></FormItem>)}/>
               <FormField control={form.control} name="phone" render={({field})=>(<FormItem><FormLabel className="text-sm font-normal">Phone</FormLabel><FormControl><Input {...field} placeholder="+1 234 567"/></FormControl><FormMessage/></FormItem>)}/>

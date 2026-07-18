@@ -37,3 +37,7 @@ export function formatDate(
     ...opts,
   }).format(new Date(date));
 }
+
+export function isValidEmail(email: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}

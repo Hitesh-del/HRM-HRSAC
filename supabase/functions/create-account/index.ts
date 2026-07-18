@@ -43,7 +43,7 @@ Deno.serve(async (req) => {
     }
 
     const {
-      identifier, // username or email
+      identifier: rawIdentifier, // username or email
       password,
       role, // 'management' | 'employee'
       full_name,
@@ -54,6 +54,8 @@ Deno.serve(async (req) => {
       date_of_joining,
     } = await req.json();
 
+    const identifier = (rawIdentifier || '').toString().trim();
+
     if (!identifier || !password || !role || !full_name) {
       return new Response(JSON.stringify({ error: 'Missing required fields' }), {
         status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -62,6 +64,12 @@ Deno.serve(async (req) => {
 
     if (!['management', 'employee'].includes(role)) {
       return new Response(JSON.stringify({ error: 'Invalid role. Only management or employee allowed.' }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    if (identifier.includes('@') && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier)) {
+      return new Response(JSON.stringify({ error: 'Invalid email format' }), {
         status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
